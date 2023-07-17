@@ -3,6 +3,8 @@ const app = express()
 
 const PORT = 3000
 
+const db = require('./models')
+
 app.get('/', (req, res) => {
   res.send('Hello')
 })
