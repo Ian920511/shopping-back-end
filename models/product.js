@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       status: DataTypes.ENUM("active", "inactive"),
       sellerId: DataTypes.INTEGER,
       categoryId: DataTypes.INTEGER,
+      image: DataTypes.STRING
     },
     {
       sequelize,
