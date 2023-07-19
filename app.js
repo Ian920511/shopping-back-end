@@ -1,14 +1,25 @@
-const express = require('express')
-const app = express()
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 
-const PORT = 3000
+const express = require("express");
+const passport = require("./config/passport");
 
-const db = require('./models')
 
-app.get('/', (req, res) => {
-  res.send('Hello')
-})
+const app = express();
+
+const PORT = 3000;
+
+const db = require("./models");
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(passport.initialize());
+
+app.get("/", (req, res) => {
+  res.send("Hello");
+});
 
 app.listen(PORT, () => {
-  console.log(`Sever is running on http://localhost:${PORT}`)
-})
+  console.log(`Sever is running on http://localhost:${PORT}`);
+});
