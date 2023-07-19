@@ -3,7 +3,8 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const express = require("express");
-const passport = require("./config/passport");
+const passport = require("./config/passport")
+const { apis } = require('./routes')
 
 
 const app = express();
@@ -15,6 +16,8 @@ const db = require("./models");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(passport.initialize());
+
+app.use('/api', apis)
 
 app.get("/", (req, res) => {
   res.send("Hello");

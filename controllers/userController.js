@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Product, Order} = require('./../models')
+const { User, Product, Order, Cart} = require('./../models')
 
 const userController = {
   getOrders: async (req, res, next) => {
@@ -123,6 +123,13 @@ const userController = {
       const token = jwt.sign(userData, process.env.JWT_SECRET, {
         expiresIn: "30d",
       })
+      
+      const userId = req.user.id
+      const cart = await Cart.findOne({ where: { userId } })
+
+      if (!cart) {
+        await Cart.create({ userId })
+      }
 
       return res.json({ token, user: userData})
     } catch(error) {
