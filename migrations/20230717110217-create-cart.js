@@ -9,23 +9,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      quantity: {
-        allowNull: false,
-        type: Sequelize.INTEGER,
-      },
-      UserId: {
+      userId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
           model: "Users",
-          key: "id",
-        },
-      },
-      ProductId: {
-        allowNull: false,
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Products",
           key: "id",
         },
       },

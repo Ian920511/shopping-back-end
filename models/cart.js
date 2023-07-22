@@ -11,20 +11,18 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Cart.belongsTo(models.User, { foreignKey: "userId" });
-      Cart.belongsTo(models.Product, { foreignKey: "productId" });
+      Cart.hasMany(models.CartProduct, { foreignKey: "cartId" });
     }
   }
   Cart.init(
     {
-      quantity: DataTypes.INTEGER,
-      UserId: DataTypes.INTEGER,
-      ProductId: DataTypes.INTEGER,
+      userId: DataTypes.INTEGER,
     },
     {
       sequelize,
       modelName: "Cart",
       tableName: "Carts",
-      underscored: true,
+      // underscored: true,
     }
   );
   return Cart;

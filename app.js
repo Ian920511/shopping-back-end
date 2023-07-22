@@ -19,10 +19,6 @@ app.use(passport.initialize());
 
 app.use('/api', apis)
 
-app.get("/", (req, res) => {
-  res.send("Hello");
-});
-
 app.listen(PORT, () => {
   console.log(`Sever is running on http://localhost:${PORT}`);
 });

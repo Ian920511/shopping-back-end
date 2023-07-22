@@ -18,14 +18,13 @@ module.exports = (sequelize, DataTypes) => {
   Order.init(
     {
       totalPrice: DataTypes.INTEGER,
-      sellerId: DataTypes.INTEGER,
       buyerId: DataTypes.INTEGER,
     },
     {
       sequelize,
       modelName: "Order",
       tableName: "Orders",
-      underscored: true,
+      // underscored: true,
     }
   );
   return Order;

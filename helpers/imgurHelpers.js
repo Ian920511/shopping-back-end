@@ -1,7 +1,7 @@
 const imgur = require("imgur-node-api");
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
 
-imgur.setClientId(IMGUR_CLIENT_ID);
+imgur.setClientID(IMGUR_CLIENT_ID);
 
 const uploadImageToImgur = async (file) => {
   try {

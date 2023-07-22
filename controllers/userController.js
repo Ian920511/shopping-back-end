@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const jwt = require("jsonwebtoken")
 const { User, Product, Order, Cart} = require('./../models')
 
 const userController = {
@@ -11,7 +12,7 @@ const userController = {
     if (role === 'buyer') {
       orderCondition = { buyerId: userId}
     } else if (role === 'seller') {
-      orderCondition = { sellId: userId}
+      orderCondition = { sellerId: userId}
     }
 
     try {
@@ -20,7 +21,7 @@ const userController = {
       })
 
       if (!orders || orders.length === 0 ) {
-        return res.status(404).json({ error: '沒有任何訂單'})
+        return res.json({ message: '沒有任何訂單'})
       }
 
       return res.json(orders)
@@ -57,7 +58,9 @@ const userController = {
     }
 
     try {
-      const user = await User.findByPk(userId)
+      const user = await User.findByPk(userId, {
+        attributes: { exclude: ["password"] },
+      })
 
       if (!user) {
         return res.status(404).json({ message: '無此使用者' })
@@ -96,6 +99,10 @@ const userController = {
       return res.status(403).json({ message: "非本人無法修改個人資訊" })
     }
 
+    if (typeof password === "undefined") {
+      return res.status(400).json({ message: "密碼不能為空" })
+    }
+
     try {
       const user = await User.findByPk(userId)
 
@@ -125,6 +132,7 @@ const userController = {
       })
       
       const userId = req.user.id
+      console.log('userId', userId)
       const cart = await Cart.findOne({ where: { userId } })
 
       if (!cart) {

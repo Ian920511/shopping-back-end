@@ -19,13 +19,14 @@ module.exports = (sequelize, DataTypes) => {
       quantity: DataTypes.INTEGER,
       price: DataTypes.INTEGER,
       orderId: DataTypes.INTEGER,
+      sellerId: DataTypes.INTEGER,
       productId: DataTypes.INTEGER,
     },
     {
       sequelize,
       modelName: "OrderDetail",
       tableName: "OrderDetails",
-      underscored: true,
+      // underscored: true,
     }
   );
   return OrderDetail;

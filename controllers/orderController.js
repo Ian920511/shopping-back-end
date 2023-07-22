@@ -1,4 +1,4 @@
-const { Order, User, OrderDetail, Product, Cart } = require("./../models");
+const { Order, User, OrderDetail, Product, Cart, CartProduct } = require("./../models");
 
 const orderController = {
   getOrders: async (req, res, next) => {
@@ -23,7 +23,7 @@ const orderController = {
           include: [
             {
               model: OrderDetail,
-              attributes: [],
+              attributes: [], 
             },
           ],
           group: ["Order.id"],
@@ -123,54 +123,64 @@ const orderController = {
     try {
       const cart = await Cart.findOne({
         where: { userId },
-        include: [{ model: Product }],
+        include: [{ model: CartProduct, include: [{ model: Product }] }],
       });
 
       if (!cart) {
         return res.status(404).json({ error: "無此購物車" });
       }
 
+      console.log(cart.toJSON());
+
       //檢查庫存 計算總價格
       let totalPrice = 0
-      const orderDetails = await Promise.all(
-        cart.Products.map( async (product) => {
-          const remainStock = product.stock - product.Cart.quantity
-          if (remainStock < 0 ) {
-            return res
-              .status(400)
-              .json({ error: `數量不足，商品剩餘數量: ${remainStock}` })
-          }
+      const orderDetails = []
 
-          totalPrice += product.price * product.Cart.quantity
-
-          return OrderDetail.create({
-            quantity: product.Cart.quantity,
-            price: product.price,
-            productId: product.id,
-            orderId : -1,
-          })
-        })
-      )
-      //建立訂單
       const order = await Order.create({ totalPrice, buyerId: userId })
 
-      await Promise.all(
-        orderDetails.map( async (orderDetail) => {
-          orderDetail.orderId = order.id
+      for (const cartProduct of cart.CartProducts) {
+        if (!cartProduct || !cartProduct.Product) {
+          return res.status(404).json({ error: "購物車無此商品" })
+        }
 
-          await orderDetail.save()
-        })
-      )
+        const product = cartProduct.Product
+        const remainStock = product.stock - cartProduct.quantity
+
+        if (
+          remainStock < 0 ||
+          cartProduct.quantity <= 0 ||
+          product.price <= 0
+        ) {
+          return res
+            .status(400)
+            .json({ error: `商品資訊有誤或數量不足，商品剩餘數量: ${remainStock}` });
+        }
+
+        totalPrice += product.price * cartProduct.quantity
+
+        const orderDetail = await OrderDetail.create({
+          quantity: cartProduct.quantity,
+          price: product.price,
+          productId: product.id,
+          orderId: order.id,
+          sellerId: product.sellerId
+        });
+
+        orderDetails.push(orderDetail)
+
+      }
+
+      await order.update({ totalPrice })
+
       //清空購物車的商品
-      await cart.setProducts([])
+      // await cart.setCartProducts([])
 
       return res.json({
         order,
         orderDetails
       })
-
-      
     } catch (error) {
+      console.log('error', error)
       next(error);
     }
   },

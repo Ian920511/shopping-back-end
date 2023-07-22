@@ -2,8 +2,8 @@ const { Category } = require('./../models')
 
 const categoryController = {
   getCategory: async (req, res, next) => {
-    const categoryId = req.params.id
-
+    const categoryId = req.params.categoryId
+    
     try {
       const category = await Category.findByPk(categoryId)
 
@@ -26,3 +26,5 @@ const categoryController = {
     }
   }
 }
+
+module.exports = categoryController

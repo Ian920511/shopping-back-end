@@ -1,13 +1,18 @@
 const { Product, User, Category } = require("./../models");
 const { uploadImageToImgur } = require('./../helpers/imgurHelpers')
 
+const pageLimit = 12
+
 const productController = {
   getProduct: async (req, res, next) => {
-    const { Id: productId } = req.params;
+    const { productId } = req.params;
 
     try {
       const product = await Product.findByPk(productId, {
-        include: [{ model: User, as: "Seller" }, { model: Category }],
+        include: [
+          { model: User, as: "Seller", attributes: { exclude: ["password"] } },
+          { model: Category },
+        ],
       });
 
       if (!product) {

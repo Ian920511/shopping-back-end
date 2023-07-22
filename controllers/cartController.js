@@ -1,4 +1,4 @@
-const { Cart, Product } = require("./../models");
+const { Cart, Product, CartProduct } = require("./../models");
 
 const cartController = {
   getCart: async (req, res, next) => {
@@ -6,15 +6,22 @@ const cartController = {
 
     try {
       const cart = await Cart.findOne({
-        where: { userId },
-        include: [{ model: Product }],
+        where: { UserId: userId },
+        include: [{ model: CartProduct, include: [{ model: Product }] }],
       });
 
       if (!cart) {
         return res.status(404).json({ error: "無此購物車" });
       }
 
-      return res.json(cart);
+      const cartProducts = cart.CartProducts
+      let totalPrice = 0
+
+      for (const cartProduct of cartProducts) {
+        totalPrice += cartProduct.quantity * cartProduct.Product.price
+      }
+
+      return res.json({cart, totalPrice});
     } catch (error) {
       next(error);
     }
@@ -29,30 +36,45 @@ const cartController = {
 
       if (!product) {
         return res.status(404).json({ error: "查無此商品" });
+      } 
+
+      const remainStock = product.stock -quantity
+
+      if (remainStock < 0) {
+        return res.status(400).json({ error: `數量不足，商品剩餘數量: ${remainStock}` })
       }
 
-      let cart = await Cart.findOne({ where: { userId, productId } });
 
-      if (cart) {
-        cart.quantity += quantity 
+      const cart = await Cart.findOne({ where: { userId } });
 
-        await Cart.update(
-          { quantity: cart.quantity },
-          { where: { userId, productId } }
-        );
-
-        cart = await Cart.findOne({ where: { userId, productId } });
-
-      } else {
-        cart = await Cart.create({
-          userId,
+      if (!cart) {
+        const newCart = await Cart.create({ userId })
+        await CartProduct.create({
+          cartId: newCart.id,
           productId,
           quantity
+        }) 
+      } else {
+        const cartProduct = await CartProduct.findOne({
+          where: { cartId: cart.id, productId }
         })
+
+        if (cartProduct) {
+          cartProduct.quantity += quantity
+          await cartProduct.save()
+        } else {
+          await CartProduct.create({
+            cartId: cart.id,
+            productId,
+            quantity
+          })
+        }
       }
 
+      // product.stock = remainStock
+      // await product.save()
 
-      return res.json(cart);
+      return res.json({ message: '成功加入購物車'});
     } catch (error) {
       next(error);
     }
@@ -64,33 +86,38 @@ const cartController = {
     const { quantity } = req.body;
 
     try {
-      const cart = await Cart.findOne({
-        where: { userId, productId },
-        include: [{ model: Product }]
-      });
+      const cart = await Cart.findOne({ where: { userId } })
 
       if (!cart) {
         return res.status(404).json({ error: "無此購物車" });
       }
 
-      const product = cart.Product
+      const cartProduct = await CartProduct.findOne({
+        where: { cartId: cart.id, productId }
+      })
+
+      if (!cartProduct) {
+         return res.status(404).json({ error: "購物車中無此商品" });
+      }
+
+      const product = await Product.findByPk(productId);
+
+      if (!product) {
+        return res.status(404).json({ error: "查無此商品" });
+      }
+
       const remainStock = product.stock - quantity
 
       if (remainStock < 0) {
         return res.status(400).json({ error: `數量不足，商品剩餘數量: ${remainStock}`})
       }
 
-      await Cart.update(
-        { quantity },
-        { where: { userId, productId } }
-      );
+      await CartProduct.update({ quantity }, { where: { cartId: cart.id, productId } });
 
-      const updatedCart = await Cart.findOne({
-        where: { userId, productId },
-        include: [{ model: Product }]
-      })
+      // product.stock = remainStock
+      // await product.save()
 
-      return res.json(updatedCart);
+      return res.json({ message: '成功更新購物車商品數量' });
     } catch (error) {
       next(error);
     }
@@ -101,10 +128,16 @@ const cartController = {
     const { productId } = req.params;
 
     try {
-      const cart = await Cart.findOne({ where: { userId } });
+      const cart = await Cart.findOne({ where: { userId }})
 
       if (!cart) {
-        return res.status(404).json({ error: "無此購物車" });
+        return res.status(404).json({ error: "無此購物車" })
+      }
+
+      const cartProduct = await CartProduct.findOne({ where: { cartId: cart.id, productId } });
+
+      if (!cartProduct) {
+        return res.status(404).json({ error: "購物車無此商品" });
       }
 
       const product = await Product.findByPk(productId);
@@ -113,9 +146,12 @@ const cartController = {
         return res.status(404).json({ error: "查無此商品" });
       }
 
-      await cart.destroy({ where: { userId, productId }})
+      await cartProduct.destroy();
 
-      return res.json(cart);
+      // product.stock += cartProduct.quantity
+      // await product.save()
+
+      return res.json(cartProduct);
     } catch (error) {
       next(error);
     }

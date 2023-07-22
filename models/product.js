@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Product.belongsTo(models.User, { as: "Seller", foreignKey: "sellerId" });
-      Product.hasMany(models.Cart, { foreignKey: "productId" });
+      Product.hasMany(models.CartProduct, { foreignKey: "productId" });
       Product.hasMany(models.OrderDetail, { foreignKey: "productId" });
       Product.belongsTo(models.Category, { foreignKey: "categoryId" });
     }
@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: "Product",
       tableName: "Products",
-      underscored: true,
+      // underscored: true,
     }
   );
   return Product;

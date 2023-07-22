@@ -10,6 +10,7 @@ passport.use(
   new LocalStrategy(
     {
       usernameField: "account",
+      passwordField: "password",
     },
     (account, password, cb) => {
       User.findOne({ where: { account } })
@@ -19,7 +20,7 @@ passport.use(
           //如果密碼錯誤
           const match = await bcrypt.compare(password, user.password);
           if (!match) return cb(null, false, "Account or password invalid");
-          
+
           return cb(null, user, { message: "Logged in successfully" });
         })
         .catch((error) => cb(error));

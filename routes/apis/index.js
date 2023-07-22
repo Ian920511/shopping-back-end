@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const passport = require("passport");
 
 const users = require('./modules/users')
 const products = require("./modules/products");
@@ -10,7 +11,6 @@ const categories = require("./modules/categories");
 const userController = require('./../../controllers/userController')
 
 const { authenticate, checkRole } = require('./../../middleware/api-auth');
-const passport = require("passport");
 
 router.post("/login", passport.authenticate("local", { session: false }), userController.login); 
 router.post('/register', userController.register)
