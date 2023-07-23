@@ -167,6 +167,17 @@ const userController = {
     delete newUser.password
 
     return res.json(newUser)
+  },
+
+  getCurrentUser: (req, res) => {
+    return res.json({
+      id: req.user.id,
+      name: req.user.name,
+      account: req.user.account,
+      tel: req.user.tel,
+      address: req.user.address,
+      role: req.user.role
+    })
   }
 }
 
