@@ -1,24 +1,41 @@
 const bcrypt = require('bcryptjs')
 const jwt = require("jsonwebtoken")
-const { User, Product, Order, Cart} = require('./../models')
+const { User, Product, Order, Cart, OrderDetail} = require('./../models')
 
 const userController = {
   getOrders: async (req, res, next) => {
     const userId = req.user.id
     const role = req.user.role
-
-    let orderCondition = {}
-
-    if (role === 'buyer') {
-      orderCondition = { buyerId: userId}
-    } else if (role === 'seller') {
-      orderCondition = { sellerId: userId}
-    }
-
+    
     try {
-      const orders = await Order.findAll({
-        where: orderCondition
-      })
+      let orders = []
+
+      if (role === "buyer") { 
+        orders = await Order.findAll({
+          where: { buyerId: userId },
+          include: [
+            {
+              model: OrderDetail,
+              as: "OrderDetails",
+              include: [
+                {
+                  model: Product,
+                  as: "Product",
+                  attributes: ["id", "name", "price"],
+                },
+              ],
+            },
+          ],
+        });
+      } else if (role === "seller") {
+        orders = await OrderDetail.findAll({
+          where: { sellerId: userId },
+          include: [
+            { model: Product, as : 'Product', attributes: ['id', 'name', 'price'] },
+            { model: Order, as: 'Order', attributes: ['id', 'totalPrice', 'createdAt'] }
+          ]
+        })
+      }
 
       if (!orders || orders.length === 0 ) {
         return res.json({ message: '沒有任何訂單'})
@@ -27,6 +44,7 @@ const userController = {
       return res.json(orders)
 
     } catch (error) {
+      console.log('error', error)
       next(error)
     }
   },

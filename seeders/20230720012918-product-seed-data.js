@@ -15,7 +15,7 @@ module.exports = {
       stock: Math.random() * 100,
       image: `https://loremflickr.com/320/240/product/?random=${ Math.random() * 1000}`,
       categoryId: Math.floor(Math.random() * 5) + 1,
-      status: Math.random() < 0.5 ? 'active': 'inactive',
+      status: Math.random() < 0.8 ? 'active': 'inactive',
       createdAt: new Date(),
       updatedAt: new Date(),
     }))
