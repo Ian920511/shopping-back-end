@@ -1,5 +1,6 @@
 const { Product, User, Category } = require("./../models");
 const { uploadImageToImgur } = require('./../helpers/imgurHelpers')
+const { Op } = require("sequelize");
 
 const imgur = require("imgur-node-api");
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
@@ -125,6 +126,9 @@ const productController = {
     let whereCondition = { status: "active" };
     let categoryId = "";
 
+    const { keyword, min, max } = req.query
+    console.log(req.query);
+
     if (req.query.page) {
       offset = (req.query.page - 1) * pageLimit;
     }
@@ -133,6 +137,27 @@ const productController = {
       categoryId = Number(req.query.categoryId);
       whereCondition["categoryId"] = categoryId;
     }
+
+    if (keyword) {
+      whereCondition.name = {
+        [Op.like]: `%${keyword}%`,
+      };
+    }
+
+    if (min) {
+      whereCondition.price = {
+        ...whereCondition.price,
+        [Op.gte]: Number(min),
+      };
+    }
+
+    if (max) {
+      whereCondition.price = {
+        ...whereCondition.price,
+        [Op.lte]: Number(max),
+      };
+    }
+
 
     try {
       const data = await Product.findAndCountAll({
