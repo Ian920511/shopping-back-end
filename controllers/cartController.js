@@ -38,9 +38,10 @@ const cartController = {
         return res.status(404).json({ error: "查無此商品" });
       } 
 
-      const remainStock = product.stock -quantity
+      const remainStock = product.stock - quantity
 
       if (remainStock < 0) {
+        console.log(remainStock)
         return res.status(400).json({ error: `數量不足，商品剩餘數量: ${remainStock}` })
       }
 

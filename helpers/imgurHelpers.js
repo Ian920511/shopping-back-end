@@ -1,18 +1,24 @@
-const imgur = require("imgur-node-api");
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
-
-imgur.setClientID(IMGUR_CLIENT_ID);
+// const imgur = require("imgur");
+// const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
+const { ImgurClient } = require("imgur");
+const client = new ImgurClient({ clientId: process.env.CLIENT_ID });
 
 const uploadImageToImgur = async (file) => {
   try {
-    const response = await imgur.uploadFile(file.path)
-    const imageUrl = response.data.link
-    return imageUrl
+    const response = await client.upload({
+      image: file.path,
+      type: 'file'
+    });
+    console.log(response)
+    const imageUrl = response.data.link;
+    return imageUrl;
   } catch (error) {
-    console.error("上傳失敗", error)
-    throw error
+    console.error("上傳失敗", error);
+    throw error;
   }
 };
+
+
 
 module.exports = {
   uploadImageToImgur,

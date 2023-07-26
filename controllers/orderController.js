@@ -130,8 +130,6 @@ const orderController = {
         return res.status(404).json({ error: "無此購物車" });
       }
 
-      console.log(cart.toJSON());
-
       //檢查庫存 計算總價格
       let totalPrice = 0
       const orderDetails = []
@@ -147,10 +145,13 @@ const orderController = {
         const remainStock = product.stock - cartProduct.quantity
 
         if (
-          remainStock < 0 ||
+          remainStock <= 0 ||
           cartProduct.quantity <= 0 ||
           product.price <= 0
         ) {
+          product.status = "inactive";
+          await product.save();
+
           return res
             .status(400)
             .json({ error: `商品資訊有誤或數量不足，商品剩餘數量: ${remainStock}` });
@@ -172,8 +173,8 @@ const orderController = {
 
       await order.update({ totalPrice })
 
-      //清空購物車的商品
-      // await cart.setCartProducts([])
+      // 清空購物車的商品
+      await cart.setCartProducts([])
 
       return res.json({
         order,

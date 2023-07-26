@@ -1,6 +1,9 @@
 const { Product, User, Category } = require("./../models");
 const { uploadImageToImgur } = require('./../helpers/imgurHelpers')
 
+const imgur = require("imgur-node-api");
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
+
 const pageLimit = 12
 
 const productController = {
@@ -68,18 +71,22 @@ const productController = {
       let imgurUrl = product.image
 
       if (file) {
-        imgurUrl = await uploadImageToImgur(file)
+        // imgurUrl = await uploadImageToImgur(file)
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(file.path,(err, res) => {
+          return product.update({
+            name,
+            description,
+            price,
+            stock,
+            status,
+            categoryId,
+            image: file ? res.data.link : null,
+          });
+        })
       }
 
-      await product.update({
-        name,
-        description,
-        price,
-        stock,
-        status,
-        categoryId,
-        image: imgurUrl
-      });
+      ;
 
       return res.json(product);
     } catch (error) {
