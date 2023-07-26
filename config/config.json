@@ -14,11 +14,6 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": "jQ702Xv39JG4",
-    "database": "shopping",
-    "host": "zeabur-gcp-asia-east1-1.clusters.zeabur.com",
-    "port": 30136,
-    "dialect": "mysql"
+    "use_env_variable": "CLEARDB_DATABASE_URL"
   }
 }
