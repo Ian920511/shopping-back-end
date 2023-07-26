@@ -58,7 +58,7 @@ const productController = {
     const { productId } = req.params;
     const { name, description, price, stock, status, categoryId } = req.body;
     const { file } = req
-
+  
     try {
       const product = await Product.findOne({
         where: { id: productId, sellerId: userId },
@@ -71,22 +71,27 @@ const productController = {
       let imgurUrl = product.image
 
       if (file) {
-        // imgurUrl = await uploadImageToImgur(file)
-        imgur.setClientID(IMGUR_CLIENT_ID)
-        imgur.upload(file.path,(err, res) => {
-          return product.update({
-            name,
-            description,
-            price,
-            stock,
-            status,
-            categoryId,
-            image: file ? res.data.link : null,
+        imgurUrl = await new Promise((resolve, reject) => {
+          imgur.setClientID(IMGUR_CLIENT_ID);
+          upload(file.path, (err, res) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res.data.link);
+            }
           });
-        })
+        });
       }
 
-      ;
+      await product.update({
+        name,
+        description,
+        price,
+        stock,
+        status,
+        categoryId,
+        image: imgurUrl ? imgurUrl : null,
+      });
 
       return res.json(product);
     } catch (error) {
