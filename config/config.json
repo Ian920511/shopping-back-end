@@ -15,9 +15,10 @@
   },
   "production": {
     "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
+    "password": "jQ702Xv39JG4",
+    "database": "shopping",
+    "host": "zeabur-gcp-asia-east1-1.clusters.zeabur.com",
+    "port": 30136,
     "dialect": "mysql"
   }
 }
