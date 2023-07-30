@@ -1,4 +1,4 @@
-# 我的記帳本
+# 購物網站
 
 ![Index page about shopping-back-end](./public/images/首頁.PNG)
 
